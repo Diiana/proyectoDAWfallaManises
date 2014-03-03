@@ -36,6 +36,8 @@ public interface GenericData {
     public String getId(String strTabla, String strCampo, String strValor) throws Exception;
 
     public String getOne(String strTabla, String strCampo, int id) throws Exception;
+    
+    public String findOne(String strTabla, String strCampo, int id) throws Exception;
 
     public Boolean existsOne(String strTabla, int id) throws Exception;
 

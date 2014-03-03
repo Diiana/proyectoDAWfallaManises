@@ -7,6 +7,7 @@ package net.fallamanises.dao;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import net.fallamanises.bean.CensoBean;
 import net.fallamanises.data.MysqlData;
 import net.fallamanises.helper.Conexion;
 import net.fallamanises.helper.FilterBean;
@@ -99,6 +100,8 @@ public class UsuarioDao_Mysql implements UsuarioDao {
             }
             oMysql.updateOne(oUsuarioBean.getId(), "usuario", "login", oUsuarioBean.getLogin());
             oMysql.updateOne(oUsuarioBean.getId(), "usuario", "password", oUsuarioBean.getPassword());
+            oMysql.updateOne(oUsuarioBean.getId(), "usuario", "id_censo", Integer.toString(oUsuarioBean.getId_censo()));
+            oMysql.updateOne(oUsuarioBean.getId(), "usuario", "permisos", Integer.toString(oUsuarioBean.getPermisos()));
             oMysql.commitTrans();
         } catch (Exception e) {
             oMysql.rollbackTrans();
@@ -136,6 +139,50 @@ public class UsuarioDao_Mysql implements UsuarioDao {
             return oUsuario;
         } catch (Exception e) {
             throw new Exception("UsuarioDao.getFromLogin: Error: " + e.getMessage());
+        }
+    }
+
+    public UsuarioBean getFromRegister(CensoBean oCenso, UsuarioBean oUsuario) throws Exception {
+        try {
+            oMysql.conexion(enumTipoConexion);
+            //comprueba qe el dni existe en la tabla censo
+            String strId = oMysql.getId("censo", "dni", oCenso.getDni());
+            //si no existe te retorna un error
+            if (strId == null) {
+                oUsuario.setId(0);
+                oMysql.desconexion();
+                return oUsuario;
+            } else {
+                //si el dni existe se va a mirar si el usuario ya existe
+                oCenso.setId(Integer.parseInt(strId));
+                String censo = oMysql.findOne("usuario", "id_censo", oCenso.getId());
+                System.out.println(censo);
+                if (censo == null) {
+                    String strId2 = oMysql.getId("usuario", "login", oUsuario.getLogin());
+                    //comprueba qe el usuario no existe en la tabla usuario
+                    if (strId2 != null) {
+                        oUsuario.setId(0);
+                        oMysql.desconexion();
+                        return oUsuario;
+                    } else {
+                        oUsuario.setId(0);
+                        oUsuario.setId_censo(oCenso.getId());
+                        oUsuario.setPermisos(0);
+                        oUsuario = set(oUsuario);
+                        oMysql.desconexion();
+                        return oUsuario;
+                    }
+                } else {
+                    oUsuario.setId(0);
+                    oMysql.desconexion();
+                    return oUsuario;
+
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("UsuarioDao.getFromRegister: Error: " + e.getMessage());
+        } finally {
+            oMysql.desconexion();
         }
     }
 

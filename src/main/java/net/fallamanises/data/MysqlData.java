@@ -171,6 +171,25 @@ public class MysqlData implements GenericData {
     }
 
     @Override
+    public String findOne(String strTabla, String strCampo, int id) throws Exception {
+        Statement oStatement;
+        ResultSet oResultSet;
+        try {
+            oStatement = (Statement) oConexionMySQL.createStatement();
+            String strSQL = "SELECT " + strCampo + " FROM " + strTabla + " WHERE "+strCampo+"=" + Integer.toString(id);
+            oResultSet = oStatement.executeQuery(strSQL);
+            if (oResultSet.next()) {
+                return oResultSet.getString(strCampo);
+            } else {
+                return null;
+            }
+
+        } catch (SQLException ex) {
+            throw new Exception("mysql.getOne: No se ha podido realizar la consulta: " + ex.getMessage());
+        }
+    }
+    
+    @Override
     public Boolean existsOne(String strTabla, int id) throws Exception {
         int result = 0;
         Statement oStatement;

@@ -11,6 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.fallamanises.bean.CensoBean;
 import net.fallamanises.bean.UsuarioBean;
 import net.fallamanises.dao.UsuarioDao_Mysql;
 import net.fallamanises.helper.Conexion;
@@ -52,7 +53,7 @@ public class ControlJsp extends HttpServlet {
         }
         if (request.getSession().getAttribute("usuarioBean") == null) {
             ob = "usuario";
-            if (!op.equals("inicio") && !op.equals("login02")) {
+            if (!op.equals("inicio") && !op.equals("login02") && !op.equals("register01") && !op.equals("register02")) {
                 op = "login01";
             }
         }
@@ -86,6 +87,27 @@ public class ControlJsp extends HttpServlet {
                 if (op.equalsIgnoreCase("logout")) {
                     request.getSession().invalidate();
                 }
+                if (op.equalsIgnoreCase("register02")) {
+                    CensoBean oCenso = new CensoBean();
+                    UsuarioBean oUsuario = new UsuarioBean();
+                    
+                    String dni = request.getParameter("dni");
+                    String login = request.getParameter("login");
+                    String pass = request.getParameter("password");
+                    
+                    if (!dni.equals("")&&!login.equals("") && !pass.equals("")) {
+                        oCenso.setDni(dni);
+                        oUsuario.setLogin(login);
+                        oUsuario.setPassword(pass);
+                        UsuarioDao_Mysql oUsuarioDao = new UsuarioDao_Mysql(Conexion.getConection());
+                        oUsuario = oUsuarioDao.getFromRegister(oCenso,oUsuario);
+                        if(oUsuario.getId() !=0){
+                            request.getSession().setAttribute("usuarioBean", oUsuario);
+                        }
+                        
+                    }
+                }
+
             }
             //servimos el jsp dentro de index.jsp
             request.setAttribute("contenido", "jsp/" + ob + "/" + op + ".jsp");
